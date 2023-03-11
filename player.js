@@ -13,7 +13,7 @@ class Player {
     }
 
     startPlaying(channel) {
-        if (!this.connection && !this.player) {
+        if (!this.connection) {
             this.connection = joinVoiceChannel({
                 channelId: channel.id,
                 guildId: channel.guild.id,
@@ -52,9 +52,18 @@ class Player {
             });
             this.resource = createAudioResource(this.stream);
             this.player.play(this.resource);
+        } else {
+            this.destroyPlayer();
         }
     }
+    destroyPlayer() {
 
+        this.resource = null; 
+        this.stream = null;
+        this.player = null; 
+        this.connection.destroy();
+        this.connection = null;
+    }
     playNextSong() {
         this.skipSong();
         this.playSong();

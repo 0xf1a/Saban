@@ -59,12 +59,22 @@ class Player {
         }
     }
 
-    fastForward(ff)
-    {
-        let duration = (this.resource.playbackDuration) / 1000;
-		
-        this.playSong(Number(duration) + Number(ff));
+    fastForward(ff) {
 
+        let duration = Number(this.resource.playbackDuration / 1000);
+        this.playSong(duration + ff);
+    }
+
+	seek(time) {
+		let tt = time.split(":");
+		if (tt.length != 2)
+		{
+			return false;
+		}
+
+		let sec=Number(tt[0])*60 + Number(tt[1])*1;
+        this.playSong(sec);
+		return true;
     }
 
     destroyPlayer() {

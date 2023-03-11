@@ -44,18 +44,29 @@ class Player {
         }
     }
 
-    playSong() {
+    playSong(begin = 0) {
         if (this.getCurrentSong()) {
             this.stream = ytdl(this.getCurrentSong(), {
                 filter: "audioonly",
-                opusEncoded: true
+                opusEncoded: true,
+                seek:begin
             });
+			
             this.resource = createAudioResource(this.stream);
             this.player.play(this.resource);
         } else {
             this.destroyPlayer();
         }
     }
+
+    fastForward(ff)
+    {
+        let duration = (this.resource.playbackDuration) / 1000;
+		
+        this.playSong(Number(duration) + Number(ff));
+
+    }
+
     destroyPlayer() {
 
         this.resource = null; 

@@ -6,11 +6,10 @@ module.exports = {
         .setName('stop')
         .setDescription('Stop the music (queue will be cleared and the bot will disconnect)'),
     async execute(interaction) {
-        if (!playerInstance.player) {
+        if (!playerInstance.getPlayer()) {
             await interaction.reply('No songs are currently being played.');
         } else {
-            playerInstance.clearQueue();
-            playerInstance.player.stop();
+            playerInstance.stop();
             await interaction.reply('Stopped.');
         }
     },

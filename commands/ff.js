@@ -11,7 +11,7 @@ module.exports = {
                 .setDescription('How many seconds to fast forward')
                 .setRequired(true)),
     async execute(interaction) {
-        if (!playerInstance.player) {
+        if (!playerInstance.getPlayer()) {
             await interaction.reply('No songs are currently being played.');
         } else {
             let seconds = interaction.options.get('seconds');

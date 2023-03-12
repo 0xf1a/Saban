@@ -6,10 +6,10 @@ module.exports = {
         .setName('skip')
         .setDescription('Skip current song'),
     async execute(interaction) {
-        if (!playerInstance.player) {
+        if (!playerInstance.getPlayer()) {
             await interaction.reply('No songs are currently being played.');
         } else {
-            playerInstance.player.stop();
+            playerInstance.skip();
             await interaction.reply('Skipping...');
         }
     },

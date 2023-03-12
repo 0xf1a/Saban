@@ -6,10 +6,10 @@ module.exports = {
         .setName('continue')
         .setDescription('Continue playing the music'),
     async execute(interaction) {
-        if (!playerInstance.player) {
+        if (!playerInstance.getPlayer()) {
             await interaction.reply('No songs are currently being played.');
         } else {
-            playerInstance.player.unpause();
+            playerInstance.continue();
             await interaction.reply('Continuing...');
         }
     },

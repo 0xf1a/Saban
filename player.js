@@ -43,6 +43,18 @@ class Player {
         }
     }
 
+    getPlayer() {
+        return this.player;
+    }
+
+    destroyPlayer() {
+        this.resource = null;
+        this.source = null;
+        this.player = null;
+        this.connection.destroy();
+        this.connection = null;
+    }
+
     async playSong(begin = 0) {
         if (this.getCurrentSong()) {
             this.source = await play.stream(this.getCurrentSong(), {
@@ -55,6 +67,28 @@ class Player {
         } else {
             this.destroyPlayer();
         }
+    }
+
+    playNextSong() {
+        this.skipCurrentSong();
+        this.playSong();
+    }
+
+    stop() {
+        this.clearQueue();
+        this.player.stop();
+    }
+
+    skip() {
+        this.player.stop();
+    }
+
+    pause() {
+        this.player.pause();
+    }
+
+    continue() {
+        this.player.unpause();
     }
 
     fastForward(ff) {
@@ -72,24 +106,11 @@ class Player {
         return true;
     }
 
-    destroyPlayer() {
-        this.resource = null;
-        this.source = null;
-        this.player = null;
-        this.connection.destroy();
-        this.connection = null;
-    }
-
-    playNextSong() {
-        this.skipSong();
-        this.playSong();
-    }
-
     addSong(url) {
         this.queue.push(url);
     }
 
-    skipSong() {
+    skipCurrentSong() {
         return this.queue.shift();
     }
 

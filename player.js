@@ -1,13 +1,12 @@
 const { joinVoiceChannel, createAudioResource, createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
 const { networkStateChangeHandler } = require('./fix.js');
-
-const ytdl = require("discord-ytdl-core");
+const play = require('play-dl'); 
 
 class Player {
     constructor() {
         this.connection = null;
         this.player = null;
-        this.stream = null;
+        this.source = null;
         this.resource = null;
         this.queue = [];
     }
@@ -44,15 +43,17 @@ class Player {
         }
     }
 
-    playSong(begin = 0) {
+   async playSong(begin = 0){
+	
         if (this.getCurrentSong()) {
-            this.stream = ytdl(this.getCurrentSong(), {
-                filter: "audioonly",
-                opusEncoded: true,
-                seek:begin
+
+            this.source = await play.stream(this.getCurrentSong(), {
+                seek:String(begin)
             });
 			
-            this.resource = createAudioResource(this.stream);
+            this.resource = createAudioResource(this.source.stream, {
+				inputType : this.source.type
+		   });
             this.player.play(this.resource);
         } else {
             this.destroyPlayer();
@@ -80,7 +81,7 @@ class Player {
     destroyPlayer() {
 
         this.resource = null; 
-        this.stream = null;
+        this.source = null;
         this.player = null; 
         this.connection.destroy();
         this.connection = null;

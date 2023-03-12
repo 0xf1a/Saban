@@ -11,12 +11,9 @@ module.exports = {
                 .setDescription('YouTube URL')
                 .setRequired(true)),
     async execute(interaction) {
-
         let url = interaction.options.get('url');
-
         playerInstance.addSong(url.value);
         playerInstance.startPlaying(interaction.member.voice.channel);
-
         await interaction.reply('Added to queue: ' + url.value);
     },
 };

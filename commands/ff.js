@@ -8,14 +8,15 @@ module.exports = {
         .addNumberOption(option =>
             option
                 .setName('seconds')
-                .setDescription('How many seconds?')
+                .setDescription('How many seconds to fast forward')
                 .setRequired(true)),
     async execute(interaction) {
-
-        let ff = interaction.options.get('seconds');
-    
-        playerInstance.fastForward(ff.value);
-
-        await interaction.reply('Fast forwarding..');
+        if (!playerInstance.player) {
+            await interaction.reply('No songs are currently being played.');
+        } else {
+            let seconds = interaction.options.get('seconds');
+            playerInstance.fastForward(seconds.value);
+            await interaction.reply('Fast forwarding...');
+        }
     },
 };

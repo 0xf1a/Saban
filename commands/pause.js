@@ -6,9 +6,11 @@ module.exports = {
         .setName('pause')
         .setDescription('Pause the music'),
     async execute(interaction) {
-        if (playerInstance.player) {
+        if (!playerInstance.player) {
+            await interaction.reply('No songs are currently being played.');
+        } else {
             playerInstance.player.pause();
+            await interaction.reply('Paused.');
         }
-        await interaction.reply('Paused.');
     },
 };

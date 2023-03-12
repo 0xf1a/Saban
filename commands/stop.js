@@ -4,12 +4,14 @@ const { playerInstance } = require('../player.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('stop')
-        .setDescription('Stop the music'),
+        .setDescription('Stop the music (queue will be cleared and the bot will disconnect)'),
     async execute(interaction) {
-        playerInstance.clearQueue();
-        if (playerInstance.player) {
+        if (!playerInstance.player) {
+            await interaction.reply('No songs are currently being played.');
+        } else {
+            playerInstance.clearQueue();
             playerInstance.player.stop();
+            await interaction.reply('Stopped.');
         }
-        await interaction.reply('Stopped.');
     },
 };

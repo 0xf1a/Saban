@@ -7,7 +7,7 @@ module.exports = {
         .setDescription('Skip current song'),
     async execute(interaction) {
         if (!playerInstance.getPlayer()) {
-            await interaction.reply('No songs are currently being played.');
+            await interaction.reply({content:'No songs are currently being played.',ephemeral: true});
         } else {
             playerInstance.skip();
             await interaction.reply('Skipping...');

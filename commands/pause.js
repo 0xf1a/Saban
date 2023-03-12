@@ -7,7 +7,7 @@ module.exports = {
         .setDescription('Pause the music'),
     async execute(interaction) {
         if (!playerInstance.getPlayer()) {
-            await interaction.reply('No songs are currently being played.');
+            await interaction.reply({content: 'No songs are currently being played.', ephemeral: true});
         } else {
             playerInstance.pause();
             await interaction.reply('Paused.');

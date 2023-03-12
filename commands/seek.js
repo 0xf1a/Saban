@@ -12,11 +12,11 @@ module.exports = {
                 .setRequired(true)),
     async execute(interaction) {
         if (!playerInstance.getPlayer()) {
-            await interaction.reply('No songs are currently being played.');
+            await interaction.reply({content:'No songs are currently being played.',ephemeral: true});
         } else {
             let time = interaction.options.get('time');
             if (!playerInstance.seek(time.value)) {
-                await interaction.reply('Incorrect time format or value!');
+                await interaction.reply({content:'Incorrect time format or value!', ephemeral: true});
             } else {
                 await interaction.reply('Seeking...');
             }

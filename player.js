@@ -2,6 +2,7 @@ const { joinVoiceChannel, createAudioResource, createAudioPlayer, NoSubscriberBe
 const { networkStateChangeHandler } = require('./fix.js');
 const play = require('play-dl');
 
+
 class Player {
     constructor() {
         this.connection = null;
@@ -11,6 +12,10 @@ class Player {
         this.queue = [];
     }
 
+    validateUrl(url) {
+        return url.startsWith('https') && play.yt_validate(url) === 'video';
+    }
+
     startPlaying(channel) {
         if (!this.connection) {
             this.connection = joinVoiceChannel({
@@ -18,13 +23,11 @@ class Player {
                 guildId: channel.guild.id,
                 adapterCreator: channel.guild.voiceAdapterCreator,
             });
-
             /* api fix */
             this.connection.on('stateChange', (oldState, newState) => {
                 Reflect.get(oldState, 'networking')?.off('stateChange', networkStateChangeHandler);
                 Reflect.get(newState, 'networking')?.on('stateChange', networkStateChangeHandler);
             });
-
             this.player = createAudioPlayer({
                 behaviors: {
                     noSubscriber: NoSubscriberBehavior.Continue,
@@ -32,11 +35,12 @@ class Player {
             });
             this.player.on('idle', () => {
                 this.playNextSong();
+
             })
             this.player.on('error', error => {
                 console.error(error);
             });
-
+            
             this.connection.subscribe(this.player);
 
             this.playSong();
@@ -50,20 +54,26 @@ class Player {
     destroyPlayer() {
         this.resource = null;
         this.source = null;
+        this.queue = [];
         this.player = null;
-        this.connection.destroy();
+        if (this.connection) {
+            this.connection.destroy();
+        }
         this.connection = null;
     }
 
     async playSong(begin = 0) {
         if (this.getCurrentSong()) {
+
             this.source = await play.stream(this.getCurrentSong(), {
                 seek: String(begin)
+
             });
             this.resource = createAudioResource(this.source.stream, {
                 inputType: this.source.type
             });
             this.player.play(this.resource);
+
         } else {
             this.destroyPlayer();
         }
@@ -132,7 +142,10 @@ class Player {
 
     serializeQueue() {
         return this.queue.join("\n");
+
     }
+
+
 }
 
 let playerInstance = new Player();

@@ -12,8 +12,12 @@ module.exports = {
                 .setRequired(true)),
     async execute(interaction) {
         let url = interaction.options.get('url');
-        playerInstance.addSong(url.value);
-        playerInstance.startPlaying(interaction.member.voice.channel);
-        await interaction.reply('Added to queue: ' + url.value);
+        if(playerInstance.validateUrl(url.value)) {
+            playerInstance.addSong(url.value);
+            playerInstance.startPlaying(interaction.member.voice.channel);
+            await interaction.reply('Added to queue: ' + url.value);
+        } else {
+            await interaction.reply('URL is not valid!');
+        }
     },
 };

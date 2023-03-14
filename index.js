@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
+const { playerInstance } = require('./player');
 
 const client = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates]});
 
@@ -17,6 +18,7 @@ for (const file of commandFiles) {
 
 client.once(Events.ClientReady, () => {
     console.log('Ready!');
+    console.log(`Logged in as ${client.user.tag}!`);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -38,6 +40,13 @@ client.on(Events.InteractionCreate, async interaction => {
         } else {
             await interaction.reply({content: 'There was an error while executing this command!', ephemeral: true});
         }
+    }
+});
+
+client.on('voiceStateUpdate', (oldState, newState) => {
+
+    if (newState.id == client.user.id && newState.channelId == null) {
+        return playerInstance.destroyPlayer();
     }
 });
 

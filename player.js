@@ -12,10 +12,6 @@ class Player {
         this.queue = [];
     }
 
-    validateUrl(url) {
-        return url.startsWith('https') && play.yt_validate(url) === 'video';
-    }
-
     startPlaying(channel) {
         if (!this.connection) {
             this.connection = joinVoiceChannel({
@@ -23,11 +19,13 @@ class Player {
                 guildId: channel.guild.id,
                 adapterCreator: channel.guild.voiceAdapterCreator,
             });
+
             /* api fix */
             this.connection.on('stateChange', (oldState, newState) => {
                 Reflect.get(oldState, 'networking')?.off('stateChange', networkStateChangeHandler);
                 Reflect.get(newState, 'networking')?.on('stateChange', networkStateChangeHandler);
             });
+
             this.player = createAudioPlayer({
                 behaviors: {
                     noSubscriber: NoSubscriberBehavior.Continue,
@@ -42,7 +40,6 @@ class Player {
             });
             
             this.connection.subscribe(this.player);
-
             this.playSong();
         }
     }
@@ -64,7 +61,6 @@ class Player {
 
     async playSong(begin = 0) {
         if (this.getCurrentSong()) {
-
             this.source = await play.stream(this.getCurrentSong(), {
                 seek: String(begin)
 
@@ -73,7 +69,6 @@ class Player {
                 inputType: this.source.type
             });
             this.player.play(this.resource);
-
         } else {
             this.destroyPlayer();
         }
@@ -116,8 +111,25 @@ class Player {
         return true;
     }
 
-    addSong(url) {
-        this.queue.push(url);
+    async addSong(url) {
+        let type = play.yt_validate(url);
+        if (url.startsWith('https')) {
+            if (type === 'video') {
+                this.queue.push(url);
+                return url;
+            }
+        } else {
+            if (type === 'search') {
+                const searched = await play.search(url, { source: { youtube : "video" }, limit: 1 });
+                if (searched[0]?.url === undefined) {
+                    return {message: "Failed to find song with given query"};
+                }
+                this.queue.push(searched[0].url);
+                return {url: searched[0].url};
+               
+            }
+        }
+        return {message: "URL/Query is not valid!"};
     }
 
     skipCurrentSong() {
@@ -144,8 +156,6 @@ class Player {
         return this.queue.join("\n");
 
     }
-
-
 }
 
 let playerInstance = new Player();

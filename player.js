@@ -63,7 +63,6 @@ class Player {
         if (this.getCurrentSong()) {
             this.source = await play.stream(this.getCurrentSong(), {
                 seek: String(begin)
-
             });
             this.resource = createAudioResource(this.source.stream, {
                 inputType: this.source.type
@@ -116,20 +115,19 @@ class Player {
         if (url.startsWith('https')) {
             if (type === 'video') {
                 this.queue.push(url);
-                return url;
+                return "Added to queue: " + url;
             }
         } else {
             if (type === 'search') {
-                const searched = await play.search(url, { source: { youtube : "video" }, limit: 1 });
-                if (searched[0]?.url === undefined) {
-                    return {message: "Failed to find song with given query"};
+                const searched = await play.search(url, { source: { youtube: "video" }, limit: 1 });
+                if (!searched.length) {
+                    return "Failed to find song with given query!";
                 }
                 this.queue.push(searched[0].url);
-                return {url: searched[0].url};
-               
+                return "Added to queue: " + searched[0].url;
             }
         }
-        return {message: "URL/Query is not valid!"};
+        return "URL or query is not valid!";
     }
 
     skipCurrentSong() {
@@ -154,7 +152,6 @@ class Player {
 
     serializeQueue() {
         return this.queue.join("\n");
-
     }
 }
 

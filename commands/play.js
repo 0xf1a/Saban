@@ -7,17 +7,15 @@ module.exports = {
         .setDescription('Plays YouTube music')
         .addStringOption(option =>
             option
-                .setName('url')
-                .setDescription('YouTube URL')
+                .setName('query')
+                .setDescription('YouTube URL or name of song')
                 .setRequired(true)),
     async execute(interaction) {
-        let url = interaction.options.get('url');
-        let result = await playerInstance.addSong(url.value);
-        if (result?.url !== undefined) {
+        let query = interaction.options.get('query');
+        let response = await playerInstance.addSong(query.value);
+        if (!playerInstance.isQueueEmpty()) {
             playerInstance.startPlaying(interaction.member.voice.channel);
-            await interaction.reply('Added to queue: ' + result.url);
-        } else {
-            await interaction.reply(result.message);
         }
+        await interaction.reply(response);
     },
 };

@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, PermissionsBitField } = require('discord.js');
 const { token } = require('./config.json');
 const { playerInstance } = require('./player');
 
@@ -26,6 +26,13 @@ client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.member.voice.channel) {
         return;
     }
+    if (!interaction.member.voice.channel.permissionsFor(client.user).has(PermissionsBitField.Flags.Connect)) {
+        return;
+      }
+      
+      if (!interaction.member.voice.channel.permissionsFor(client.user).has(PermissionsBitField.Flags.Speak)) {
+        return;
+      }
 
     const command = client.commands.get(interaction.commandName);
 
@@ -48,6 +55,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
     if (newState.id == client.user.id && newState.channelId == null) {
         return playerInstance.destroyPlayer();
     }
+
 });
 
 client.login(token);

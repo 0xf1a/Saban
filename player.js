@@ -19,7 +19,6 @@ class Player {
                 guildId: channel.guild.id,
                 adapterCreator: channel.guild.voiceAdapterCreator,
             });
-
             /* api fix */
             this.connection.on('stateChange', (oldState, newState) => {
                 Reflect.get(oldState, 'networking')?.off('stateChange', networkStateChangeHandler);

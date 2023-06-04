@@ -12,10 +12,14 @@ module.exports = {
                 .setRequired(true)),
     async execute(interaction) {
         let query = interaction.options.get('query');
-        let response = await playerInstance.addSong(query.value);
+        let status = await playerInstance.addSong(query.value);
         if (!playerInstance.isQueueEmpty()) {
             playerInstance.startPlaying(interaction.member.voice.channel);
         }
-        await interaction.reply(response);
+        if (!status) {
+            await interaction.reply({content: 'Failed to find song with given query!', ephemeral: true});
+        } else {
+            await interaction.reply('Added to queue: ' + playerInstance.getLastSong().url);
+        }
     },
 };

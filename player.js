@@ -1,7 +1,8 @@
 const { joinVoiceChannel, createAudioResource, createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
+const { Queue } = require('./queue.js');
+const { Song } = require('./song.js');
 const { networkStateChangeHandler } = require('./fix.js');
 const play = require('play-dl');
-
 
 class Player {
     constructor() {
@@ -9,7 +10,7 @@ class Player {
         this.player = null;
         this.source = null;
         this.resource = null;
-        this.queue = [];
+        this.queue = new Queue();
     }
 
     startPlaying(channel) {
@@ -37,7 +38,7 @@ class Player {
             this.player.on('error', error => {
                 console.error(error);
             });
-            
+
             this.connection.subscribe(this.player);
             this.playSong();
         }
@@ -50,17 +51,20 @@ class Player {
     destroyPlayer() {
         this.resource = null;
         this.source = null;
-        this.queue = [];
         this.player = null;
         if (this.connection) {
             this.connection.destroy();
         }
         this.connection = null;
+        this.queue.clear();
     }
 
     async playSong(begin = 0) {
-        if (this.getCurrentSong()) {
-            this.source = await play.stream(this.getCurrentSong(), {
+        if (this.getFirstSong()) {
+            if (begin >= this.getFirstSong().duration) {
+                return false;
+            }
+            this.source = await play.stream(this.getFirstSong().url, {
                 seek: String(begin)
             });
             this.resource = createAudioResource(this.source.stream, {
@@ -70,15 +74,16 @@ class Player {
         } else {
             this.destroyPlayer();
         }
+        return true;
     }
 
     playNextSong() {
-        this.skipCurrentSong();
+        this.queue.dequeue();
         this.playSong();
     }
 
     stop() {
-        this.clearQueue();
+        this.queue.clear();
         this.player.stop();
     }
 
@@ -94,63 +99,56 @@ class Player {
         this.player.unpause();
     }
 
-    fastForward(ff) {
+    async fastForward(ff) {
         let duration = Number(this.resource.playbackDuration / 1000);
-        this.playSong(duration + ff);
+        return this.playSong(duration + ff);
     }
 
-    seek(time) {
-        let tt = time.split(":");
-        if (tt.length !== 2) {
-            return false;
-        }
-        let sec = Number(tt[0]) * 60 + Number(tt[1]);
-        this.playSong(sec);
-        return true;
+    async seek(hours, minutes, seconds) {
+        let sec = Number(hours) * 60 * 60
+                + Number(minutes) * 60
+                + Number(seconds);
+        return this.playSong(sec);
     }
 
-    async addSong(url) {
-        let type = play.yt_validate(url);
-        if (url.startsWith('https')) {
-            if (type === 'video') {
-                this.queue.push(url);
-                return "Added to queue: " + url;
-            }
-        } else {
-            if (type === 'search') {
-                const searched = await play.search(url, { source: { youtube: "video" }, limit: 1 });
-                if (!searched.length) {
-                    return "Failed to find song with given query!";
-                }
-                this.queue.push(searched[0].url);
-                return "Added to queue: " + searched[0].url;
+    async addSong(query) {
+
+        let url = '';
+        let type = play.yt_validate(query);
+
+        if (type === 'video' && query.startsWith('https')) {
+            url = query;
+        } else if (type === 'search') {
+            const searched = await play.search(query, {source: {youtube: 'video'}, limit: 1});
+            if (searched.length) {
+                url = searched[0].url;
             }
         }
-        return "URL or query is not valid!";
-    }
 
-    skipCurrentSong() {
-        return this.queue.shift();
-    }
+        if (url) {
+            let info = await play.video_basic_info(url);
+            let song = new Song(url, info.video_details.durationInSec);
+            this.queue.enqueue(song);
+            return true;
+        }
 
-    getCurrentSong() {
-        return this.queue[0];
-    }
-
-    getQueueLength() {
-        return this.queue.length;
+        return false;
     }
 
     isQueueEmpty() {
-        return this.getQueueLength() === 0;
-    }
-
-    clearQueue() {
-        this.queue = [];
+        return this.queue.empty();
     }
 
     serializeQueue() {
-        return this.queue.join("\n");
+        return this.queue.serialize();
+    }
+
+    getFirstSong() {
+        return this.queue.first();
+    }
+
+    getLastSong() {
+        return this.queue.last();
     }
 }
 

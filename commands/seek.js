@@ -7,16 +7,29 @@ module.exports = {
         .setDescription('Go to a specific time in the song')
         .addStringOption(option =>
             option
-                .setName('time')
-                .setDescription('Supported format is mm:ss')
+                .setName('hours')
+                .setDescription('Hours in format hh:mm:ss')
+                .setRequired(true))
+        .addStringOption(option =>
+            option
+                .setName('minutes')
+                .setDescription('Minutes in format hh:mm:ss')
+                .setRequired(true))
+        .addStringOption(option =>
+            option
+                .setName('seconds')
+                .setDescription('Seconds in format hh:mm:ss')
                 .setRequired(true)),
     async execute(interaction) {
         if (!playerInstance.getPlayer()) {
-            await interaction.reply({content:'No songs are currently being played.',ephemeral: true});
+            await interaction.reply({content: 'No songs are currently being played.', ephemeral: true});
         } else {
-            let time = interaction.options.get('time');
-            if (!playerInstance.seek(time.value)) {
-                await interaction.reply({content:'Incorrect time format or value!', ephemeral: true});
+            let hours = interaction.options.get('hours');
+            let minutes = interaction.options.get('minutes');
+            let seconds = interaction.options.get('seconds');
+            let status = await playerInstance.seek(hours.value, minutes.value, seconds.value);
+            if (!status) {
+                await interaction.reply('Cannot seek.');
             } else {
                 await interaction.reply('Seeking...');
             }

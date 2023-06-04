@@ -17,7 +17,6 @@ for (const file of commandFiles) {
 }
 
 client.once(Events.ClientReady, () => {
-    console.log('Ready!');
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
@@ -28,11 +27,10 @@ client.on(Events.InteractionCreate, async interaction => {
     }
     if (!interaction.member.voice.channel.permissionsFor(client.user).has(PermissionsBitField.Flags.Connect)) {
         return;
-      }
-      
-      if (!interaction.member.voice.channel.permissionsFor(client.user).has(PermissionsBitField.Flags.Speak)) {
+    }
+    if (!interaction.member.voice.channel.permissionsFor(client.user).has(PermissionsBitField.Flags.Speak)) {
         return;
-      }
+    }
 
     const command = client.commands.get(interaction.commandName);
 
@@ -51,11 +49,9 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.on('voiceStateUpdate', (oldState, newState) => {
-
-    if (newState.id == client.user.id && newState.channelId == null) {
+    if (newState.id === client.user.id && !newState.channelId) {
         return playerInstance.destroyPlayer();
     }
-
 });
 
 client.login(token);

@@ -29,7 +29,7 @@ module.exports = {
             let seconds = interaction.options.get('seconds');
             let status = await playerInstance.seek(hours.value, minutes.value, seconds.value);
             if (!status) {
-                await interaction.reply('Cannot seek.');
+                await interaction.reply({content: 'Cannot seek to that specific time.', ephemeral: true});
             } else {
                 await interaction.reply('Seeking...');
             }

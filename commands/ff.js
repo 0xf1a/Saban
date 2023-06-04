@@ -17,7 +17,7 @@ module.exports = {
             let seconds = interaction.options.get('seconds');
             let status = await playerInstance.fastForward(seconds.value);
             if (!status) {
-                await interaction.reply('Cannot fast forward.');
+                await interaction.reply({content: 'Cannot fast forward that many seconds.', ephemeral: true});
             } else {
                 await interaction.reply('Fast forwarding...');
             }

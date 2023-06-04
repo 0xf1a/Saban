@@ -16,7 +16,7 @@ class Queue {
     }
 
     last() {
-        return this.queue[this.queue.length - 1];
+        return this.queue[this.length() - 1];
     }
 
     length() {
@@ -32,7 +32,11 @@ class Queue {
     }
 
     serialize() {
-        return this.queue.join("\n");
+        let queue = '';
+        this.queue.forEach(element => {
+            queue += element.url + "\n";
+        });
+        return queue;
     }
 }
 

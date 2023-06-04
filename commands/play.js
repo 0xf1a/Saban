@@ -17,7 +17,7 @@ module.exports = {
             playerInstance.startPlaying(interaction.member.voice.channel);
         }
         if (!status) {
-            await interaction.reply({content: 'Failed to find song with given query!', ephemeral: true});
+            await interaction.reply({content: 'Failed to find song for given query!', ephemeral: true});
         } else {
             await interaction.reply('Added to queue: ' + playerInstance.getLastSong().url);
         }

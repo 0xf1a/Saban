@@ -112,26 +112,26 @@ class Player {
     }
 
     async addSong(query) {
-
-        let url = '';
-        let type = play.yt_validate(query);
-
-        if (type === 'video' && query.startsWith('https')) {
-            url = query;
-        } else if (type === 'search') {
-            const searched = await play.search(query, {source: {youtube: 'video'}, limit: 1});
-            if (searched.length) {
-                url = searched[0].url;
-            }
-        }
-
-        if (url) {
-            let info = await play.video_basic_info(url);
-            let song = new Song(url, info.video_details.durationInSec);
-            this.queue.enqueue(song);
-            return true;
-        }
-
+		try {
+			let url = '';
+			let type = play.yt_validate(query);
+			if (type === 'video' && query.startsWith('https')) {
+				url = query;
+			} else if (type === 'search') {
+				const searched = await play.search(query, {source: {youtube: 'video'}, limit: 1});
+				if (searched.length) {
+					url = searched[0].url;
+				}
+			}
+			if (url) {
+				let info = await play.video_basic_info(url);
+				let song = new Song(url, info.video_details.durationInSec);
+				this.queue.enqueue(song);
+				return true;
+			}
+		} catch (e) {
+			console.log(e);
+		}
         return false;
     }
 
